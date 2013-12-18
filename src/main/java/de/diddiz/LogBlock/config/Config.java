@@ -1,6 +1,10 @@
 package de.diddiz.LogBlock.config;
 
 import de.diddiz.LogBlock.*;
+import de.diddiz.util.BukkitUtils;
+import de.diddiz.util.Utils;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -58,8 +62,9 @@ public class Config
 		final Map<String, Object> def = new HashMap<String, Object>();
 		def.put("version", logblock.getDescription().getVersion());
 		final List<String> worldNames = new ArrayList<String>();
-		for (final World world : getWorlds())
+		for (final World world : Bukkit.getWorlds()) {
 			worldNames.add(world.getName());
+		}
 		if (worldNames.isEmpty()) {
 			worldNames.add("world");
 			worldNames.add("world_nether");
@@ -97,8 +102,8 @@ public class Config
 		def.put("lookup.linesPerPage", 15);
 		def.put("lookup.linesLimit", 1500);
 		try {
-			formatter = new SimpleDateFormat(config.getString("lookup.dateFormat", "MM-dd HH:mm:ss"));
-		} catch (IllegalArgumentException e) {
+			Config.formatter = new SimpleDateFormat(config.getString("lookup.dateFormat", "MM-dd HH:mm:ss"));
+		} catch (final IllegalArgumentException e) {
 			throw new DataFormatException("Invalid specification for  date format, please see http://docs.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html : " + e.getMessage());
 		}
 		def.put("lookup.dateFormat", "MM-dd HH:mm:ss");
@@ -127,64 +132,68 @@ public class Config
 		def.put("tools.toolblock.mode", "LOOKUP");
 		def.put("tools.toolblock.permissionDefault", "OP");
 		def.put("safety.id.check", true);
-		for (final Entry<String, Object> e : def.entrySet())
-			if (!config.contains(e.getKey()))
+		for (final Entry<String, Object> e : def.entrySet()) {
+			if (!config.contains(e.getKey())) {
 				config.set(e.getKey(), e.getValue());
+			}
+		}
 		logblock.saveConfig();
-		url = "jdbc:mysql://" + config.getString("mysql.host") + ":" + config.getInt("mysql.port") + "/" + getStringIncludingInts(config, "mysql.database") + "?useUnicode=true&characterEncoding=utf-8";
-		user = getStringIncludingInts(config, "mysql.user");
-		password = getStringIncludingInts(config, "mysql.password");
-		delayBetweenRuns = config.getInt("consumer.delayBetweenRuns", 2);
-		forceToProcessAtLeast = config.getInt("consumer.forceToProcessAtLeast", 0);
-		timePerRun = config.getInt("consumer.timePerRun", 1000);
-		fireCustomEvents = config.getBoolean("consumer.fireCustomEvents", false);
-		useBukkitScheduler = config.getBoolean("consumer.useBukkitScheduler", true);
-		queueWarningSize = config.getInt("consumer.queueWarningSize", 1000);
-		enableAutoClearLog = config.getBoolean("clearlog.enableAutoClearLog");
-		autoClearLog = config.getStringList("clearlog.auto");
-		dumpDeletedLog = config.getBoolean("clearlog.dumpDeletedLog", false);
-		autoClearLogDelay = parseTimeSpec(config.getString("clearlog.autoClearLogDelay").split(" "));
-		logCreeperExplosionsAsPlayerWhoTriggeredThese = config.getBoolean("logging.logCreeperExplosionsAsPlayerWhoTriggeredThese", false);
-		logPlayerInfo = config.getBoolean("logging.logPlayerInfo", true);
+		Config.url = "jdbc:mysql://" + config.getString("mysql.host") + ":" + config.getInt("mysql.port") + "/" + Config.getStringIncludingInts(config, "mysql.database") + "?useUnicode=true&characterEncoding=utf-8";
+		Config.user = Config.getStringIncludingInts(config, "mysql.user");
+		Config.password = Config.getStringIncludingInts(config, "mysql.password");
+		Config.delayBetweenRuns = config.getInt("consumer.delayBetweenRuns", 2);
+		Config.forceToProcessAtLeast = config.getInt("consumer.forceToProcessAtLeast", 0);
+		Config.timePerRun = config.getInt("consumer.timePerRun", 1000);
+		Config.fireCustomEvents = config.getBoolean("consumer.fireCustomEvents", false);
+		Config.useBukkitScheduler = config.getBoolean("consumer.useBukkitScheduler", true);
+		Config.queueWarningSize = config.getInt("consumer.queueWarningSize", 1000);
+		Config.enableAutoClearLog = config.getBoolean("clearlog.enableAutoClearLog");
+		Config.autoClearLog = config.getStringList("clearlog.auto");
+		Config.dumpDeletedLog = config.getBoolean("clearlog.dumpDeletedLog", false);
+		Config.autoClearLogDelay = Utils.parseTimeSpec(config.getString("clearlog.autoClearLogDelay").split(" "));
+		Config.logCreeperExplosionsAsPlayerWhoTriggeredThese = config.getBoolean("logging.logCreeperExplosionsAsPlayerWhoTriggeredThese", false);
+		Config.logPlayerInfo = config.getBoolean("logging.logPlayerInfo", true);
 		try {
-			logKillsLevel = LogKillsLevel.valueOf(config.getString("logging.logKillsLevel").toUpperCase());
+			Config.logKillsLevel = LogKillsLevel.valueOf(config.getString("logging.logKillsLevel").toUpperCase());
 		} catch (final IllegalArgumentException ex) {
 			throw new DataFormatException("logging.logKillsLevel doesn't appear to be a valid log level. Allowed are 'PLAYERS', 'MONSTERS' and 'ANIMALS'");
 		}
-		logEnvironmentalKills = config.getBoolean("logging.logEnvironmentalKills", false);
-		hiddenPlayers = new HashSet<String>();
-		for (final String playerName : config.getStringList("logging.hiddenPlayers"))
-			hiddenPlayers.add(playerName.toLowerCase().trim());
-		hiddenBlocks = new HashSet<Integer>();
+		Config.logEnvironmentalKills = config.getBoolean("logging.logEnvironmentalKills", false);
+		Config.hiddenPlayers = new HashSet<String>();
+		for (final String playerName : config.getStringList("logging.hiddenPlayers")) {
+			Config.hiddenPlayers.add(playerName.toLowerCase().trim());
+		}
+		Config.hiddenBlocks = new HashSet<Integer>();
 		for (final Object blocktype : config.getList("logging.hiddenBlocks")) {
 			final Material mat = Material.matchMaterial(String.valueOf(blocktype));
-			if (mat != null)
-				hiddenBlocks.add(mat.getId());
-			else
+			if (mat != null) {
+				Config.hiddenBlocks.add(mat.getId());
+			} else {
 				throw new DataFormatException("Not a valid material: '" + blocktype + "'");
+			}
 		}
-		ignoredChat = new HashSet<String>();
-		for (String chatCommand : config.getStringList("logging.ignoredChat")) {
-			ignoredChat.add(chatCommand);
+		Config.ignoredChat = new HashSet<String>();
+		for (final String chatCommand : config.getStringList("logging.ignoredChat")) {
+			Config.ignoredChat.add(chatCommand);
 		}
-		dontRollback = new HashSet<Integer>(config.getIntegerList("rollback.dontRollback"));
-		replaceAnyway = new HashSet<Integer>(config.getIntegerList("rollback.replaceAnyway"));
-		rollbackMaxTime = parseTimeSpec(config.getString("rollback.maxTime").split(" "));
-		rollbackMaxArea = config.getInt("rollback.maxArea", 50);
-		defaultDist = config.getInt("lookup.defaultDist", 20);
-		defaultTime = parseTimeSpec(config.getString("lookup.defaultTime").split(" "));
-		linesPerPage = config.getInt("lookup.linesPerPage", 15);
-		linesLimit = config.getInt("lookup.linesLimit", 1500);
-		askRollbacks = config.getBoolean("questioner.askRollbacks", true);
-		askRedos = config.getBoolean("questioner.askRedos", true);
-		askClearLogs = config.getBoolean("questioner.askClearLogs", true);
-		askClearLogAfterRollback = config.getBoolean("questioner.askClearLogAfterRollback", true);
-		askRollbackAfterBan = config.getBoolean("questioner.askRollbackAfterBan", false);
-		safetyIdCheck = config.getBoolean("safety.id.check", true);
-		banPermission = config.getString("questioner.banPermission");
+		Config.dontRollback = new HashSet<Integer>(config.getIntegerList("rollback.dontRollback"));
+		Config.replaceAnyway = new HashSet<Integer>(config.getIntegerList("rollback.replaceAnyway"));
+		Config.rollbackMaxTime = Utils.parseTimeSpec(config.getString("rollback.maxTime").split(" "));
+		Config.rollbackMaxArea = config.getInt("rollback.maxArea", 50);
+		Config.defaultDist = config.getInt("lookup.defaultDist", 20);
+		Config.defaultTime = Utils.parseTimeSpec(config.getString("lookup.defaultTime").split(" "));
+		Config.linesPerPage = config.getInt("lookup.linesPerPage", 15);
+		Config.linesLimit = config.getInt("lookup.linesLimit", 1500);
+		Config.askRollbacks = config.getBoolean("questioner.askRollbacks", true);
+		Config.askRedos = config.getBoolean("questioner.askRedos", true);
+		Config.askClearLogs = config.getBoolean("questioner.askClearLogs", true);
+		Config.askClearLogAfterRollback = config.getBoolean("questioner.askClearLogAfterRollback", true);
+		Config.askRollbackAfterBan = config.getBoolean("questioner.askRollbackAfterBan", false);
+		Config.safetyIdCheck = config.getBoolean("safety.id.check", true);
+		Config.banPermission = config.getString("questioner.banPermission");
 		final List<Tool> tools = new ArrayList<Tool>();
 		final ConfigurationSection toolsSec = config.getConfigurationSection("tools");
-		for (final String toolName : toolsSec.getKeys(false))
+		for (final String toolName : toolsSec.getKeys(false)) {
 			try {
 				final ConfigurationSection tSec = toolsSec.getConfigurationSection(toolName);
 				final List<String> aliases = tSec.getStringList("aliases");
@@ -195,71 +204,80 @@ public class Config
 				final boolean canDrop = tSec.getBoolean("canDrop", false);
 				final QueryParams params = new QueryParams(logblock);
 				params.prepareToolQuery = true;
-				params.parseArgs(getConsoleSender(), Arrays.asList(tSec.getString("params").split(" ")));
+				params.parseArgs(Bukkit.getConsoleSender(), Arrays.asList(tSec.getString("params").split(" ")));
 				final ToolMode mode = ToolMode.valueOf(tSec.getString("mode").toUpperCase());
 				final PermissionDefault pdef = PermissionDefault.valueOf(tSec.getString("permissionDefault").toUpperCase());
 				tools.add(new Tool(toolName, aliases, leftClickBehavior, rightClickBehavior, defaultEnabled, item, canDrop, params, mode, pdef));
 			} catch (final Exception ex) {
-				getLogger().log(Level.WARNING, "Error at parsing tool '" + toolName + "': ", ex);
+				Bukkit.getLogger().log(Level.WARNING, "Error at parsing tool '" + toolName + "': ", ex);
 			}
-		toolsByName = new HashMap<String, Tool>();
-		toolsByType = new HashMap<Integer, Tool>();
+		}
+		Config.toolsByName = new HashMap<String, Tool>();
+		Config.toolsByType = new HashMap<Integer, Tool>();
 		for (final Tool tool : tools) {
-			toolsByType.put(tool.item, tool);
-			toolsByName.put(tool.name.toLowerCase(), tool);
-			for (final String alias : tool.aliases)
-				toolsByName.put(alias, tool);
+			Config.toolsByType.put(tool.item, tool);
+			Config.toolsByName.put(tool.name.toLowerCase(), tool);
+			for (final String alias : tool.aliases) {
+				Config.toolsByName.put(alias, tool);
+			}
 		}
 		final List<String> loggedWorlds = config.getStringList("loggedWorlds");
-		worldConfigs = new HashMap<String, WorldConfig>();
-		if (loggedWorlds.isEmpty())
+		Config.worldConfigs = new HashMap<String, WorldConfig>();
+		if (loggedWorlds.isEmpty()) {
 			throw new DataFormatException("No worlds configured");
-		for (final String world : loggedWorlds)
-			worldConfigs.put(world, new WorldConfig(new File(logblock.getDataFolder(), friendlyWorldname(world) + ".yml")));
-		superWorldConfig = new LoggingEnabledMapping();
-		for (final WorldConfig wcfg : worldConfigs.values())
-			for (final Logging l : Logging.values())
-				if (wcfg.isLogging(l))
-					superWorldConfig.setLogging(l, true);
+		}
+		for (final String world : loggedWorlds) {
+			Config.worldConfigs.put(world, new WorldConfig(new File(logblock.getDataFolder(), BukkitUtils.friendlyWorldname(world) + ".yml")));
+		}
+		Config.superWorldConfig = new LoggingEnabledMapping();
+		for (final WorldConfig wcfg : Config.worldConfigs.values()) {
+			for (final Logging l : Logging.values()) {
+				if (wcfg.isLogging(l)) {
+					Config.superWorldConfig.setLogging(l, true);
+				}
+			}
+		}
 	}
 
 	private static String getStringIncludingInts(ConfigurationSection cfg, String key) {
 		String str = cfg.getString(key);
-		if (str == null)
+		if (str == null) {
 			str = String.valueOf(cfg.getInt(key));
-		if (str == null)
+		}
+		if (str == null) {
 			str = "No value set for '" + key + "'";
+		}
 		return str;
 	}
 
 	public static boolean isLogging(World world, Logging l) {
-		final WorldConfig wcfg = worldConfigs.get(world.getName());
-		return wcfg != null && wcfg.isLogging(l);
+		final WorldConfig wcfg = Config.worldConfigs.get(world.getName());
+		return (wcfg != null) && wcfg.isLogging(l);
 	}
 
 	public static boolean isLogging(String worldName, Logging l) {
-		final WorldConfig wcfg = worldConfigs.get(worldName);
-		return wcfg != null && wcfg.isLogging(l);
+		final WorldConfig wcfg = Config.worldConfigs.get(worldName);
+		return (wcfg != null) && wcfg.isLogging(l);
 	}
 
 	public static boolean isLogged(World world) {
-		return worldConfigs.containsKey(world.getName());
+		return Config.worldConfigs.containsKey(world.getName());
 	}
 
 	public static WorldConfig getWorldConfig(World world) {
-		return worldConfigs.get(world.getName());
+		return Config.worldConfigs.get(world.getName());
 	}
 
 	public static WorldConfig getWorldConfig(String world) {
-		return worldConfigs.get(world);
+		return Config.worldConfigs.get(world);
 	}
 
 	public static boolean isLogging(Logging l) {
-		return superWorldConfig.isLogging(l);
+		return Config.superWorldConfig.isLogging(l);
 	}
 
 	public static Collection<WorldConfig> getLoggedWorlds() {
-		return worldConfigs.values();
+		return Config.worldConfigs.values();
 	}
 }
 
@@ -268,10 +286,10 @@ class LoggingEnabledMapping
 	private final boolean[] logging = new boolean[Logging.length];
 
 	public void setLogging(Logging l, boolean enabled) {
-		logging[l.ordinal()] = enabled;
+		this.logging[l.ordinal()] = enabled;
 	}
 
 	public boolean isLogging(Logging l) {
-		return logging[l.ordinal()];
+		return this.logging[l.ordinal()];
 	}
 }

@@ -10,6 +10,6 @@ public enum ToolMode
 	}
 
 	public String getPermission() {
-		return permission;
+		return this.permission;
 	}
 }

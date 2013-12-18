@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,8 +22,9 @@ public class MaterialName
 
 	static {
 		// Add all known materials
-		for (final Material mat : Material.values())
-			materialNames.put(mat.getId(), mat.toString().replace('_', ' ').toLowerCase());
+		for (final Material mat : Material.values()) {
+			MaterialName.materialNames.put(mat.getId(), mat.toString().replace('_', ' ').toLowerCase());
+		}
 		// Load config
 		final File file = new File("plugins/LogBlock/materials.yml");
 		final YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
@@ -39,57 +42,65 @@ public class MaterialName
 			cfg.set("31.0", "dead long grass");
 			cfg.set("31.2", "fern");
 			for (byte i = 0; i < 7; i++) {
-				cfg.set("35." + i, toReadable(Material.STEP.getNewData(i)));
-				cfg.set("351." + i, toReadable(Material.DOUBLE_STEP.getNewData(i)));
+				cfg.set("35." + i, MaterialName.toReadable(Material.STEP.getNewData(i)));
+				cfg.set("351." + i, MaterialName.toReadable(Material.DOUBLE_STEP.getNewData(i)));
 			}
 			for (byte i = 0; i < 16; i++) {
-				cfg.set("35." + i, toReadable(Material.WOOL.getNewData(i)));
-				cfg.set("351." + i, toReadable(Material.INK_SACK.getNewData(i)));
+				cfg.set("35." + i, MaterialName.toReadable(Material.WOOL.getNewData(i)));
+				cfg.set("351." + i, MaterialName.toReadable(Material.INK_SACK.getNewData(i)));
 			}
 			try {
 				cfg.save(file);
 			} catch (final IOException ex) {
-				getLogger().log(Level.WARNING, "Unable to save material.yml: ", ex);
+				Bukkit.getLogger().log(Level.WARNING, "Unable to save material.yml: ", ex);
 			}
 		}
-		for (final String entry : cfg.getKeys(false))
-			if (isInt(entry)) {
-				if (cfg.isString(entry))
-					materialNames.put(Integer.valueOf(entry), cfg.getString(entry));
-				else if (cfg.isConfigurationSection(entry)) {
+		for (final String entry : cfg.getKeys(false)) {
+			if (Utils.isInt(entry)) {
+				if (cfg.isString(entry)) {
+					MaterialName.materialNames.put(Integer.valueOf(entry), cfg.getString(entry));
+				} else if (cfg.isConfigurationSection(entry)) {
 					final Map<Short, String> dataNames = new HashMap<Short, String>();
-					materialDataNames.put(Integer.valueOf(entry), dataNames);
+					MaterialName.materialDataNames.put(Integer.valueOf(entry), dataNames);
 					final ConfigurationSection sec = cfg.getConfigurationSection(entry);
-					for (final String data : sec.getKeys(false))
-						if (isShort(data)) {
-							if (sec.isString(data))
+					for (final String data : sec.getKeys(false)) {
+						if (Utils.isShort(data)) {
+							if (sec.isString(data)) {
 								dataNames.put(Short.valueOf(data), sec.getString(data));
-							else
-								getLogger().warning("Parsing materials.yml: '" + data + "' is not a string.");
-						} else
-							getLogger().warning("Parsing materials.yml: '" + data + "' is no valid material data");
-				} else
-					getLogger().warning("Parsing materials.yml: '" + entry + "' is neither a string nor a section.");
-			} else
-				getLogger().warning("Parsing materials.yml: '" + entry + "' is no valid material id");
+							} else {
+								Bukkit.getLogger().warning("Parsing materials.yml: '" + data + "' is not a string.");
+							}
+						} else {
+							Bukkit.getLogger().warning("Parsing materials.yml: '" + data + "' is no valid material data");
+						}
+					}
+				} else {
+					Bukkit.getLogger().warning("Parsing materials.yml: '" + entry + "' is neither a string nor a section.");
+				}
+			} else {
+				Bukkit.getLogger().warning("Parsing materials.yml: '" + entry + "' is no valid material id");
+			}
+		}
 	}
 
 	/**
 	 * @return Name of the material, or if it's unknown, the id.
 	 */
 	public static String materialName(int type) {
-		return materialNames.containsKey(type) ? materialNames.get(type) : String.valueOf(type);
+		return MaterialName.materialNames.containsKey(type) ? MaterialName.materialNames.get(type) : String.valueOf(type);
 	}
 
 	/**
 	 * @return Name of the material regarding it's data, or if it's unknown, the basic name.
 	 */
 	public static String materialName(int type, short data) {
-		final Map<Short, String> dataNames = materialDataNames.get(type);
-		if (dataNames != null)
-			if (dataNames.containsKey(data))
+		final Map<Short, String> dataNames = MaterialName.materialDataNames.get(type);
+		if (dataNames != null) {
+			if (dataNames.containsKey(data)) {
 				return dataNames.get(data);
-		return materialName(type);
+			}
+		}
+		return MaterialName.materialName(type);
 	}
 
 	private static String toReadable(MaterialData matData) {

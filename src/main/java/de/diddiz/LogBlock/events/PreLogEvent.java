@@ -19,7 +19,7 @@ public abstract class PreLogEvent extends Event implements Cancellable {
 	 */
 	public String getOwner() {
 
-		return owner;
+		return this.owner;
 	}
 
 	/**
@@ -32,11 +32,13 @@ public abstract class PreLogEvent extends Event implements Cancellable {
 		this.owner = owner.replaceAll("[^a-zA-Z0-9_]", "");
 	}
 
+	@Override
 	public boolean isCancelled() {
 
-		return cancelled;
+		return this.cancelled;
 	}
 
+	@Override
 	public void setCancelled(boolean cancelled) {
 
 		this.cancelled = cancelled;

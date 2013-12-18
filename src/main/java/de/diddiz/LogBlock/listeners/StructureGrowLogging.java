@@ -7,6 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.world.StructureGrowEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.config.WorldConfig;
 
 public class StructureGrowLogging extends LoggingListener
@@ -17,20 +18,23 @@ public class StructureGrowLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onStructureGrow(StructureGrowEvent event) {
-		final WorldConfig wcfg = getWorldConfig(event.getWorld());
+		final WorldConfig wcfg = Config.getWorldConfig(event.getWorld());
 		if (wcfg != null) {
 			final String playerName;
 			if (event.getPlayer() != null) {
-				if (!wcfg.isLogging(Logging.BONEMEALSTRUCTUREGROW))
+				if (!wcfg.isLogging(Logging.BONEMEALSTRUCTUREGROW)) {
 					return;
+				}
 				playerName = event.getPlayer().getName();
 			} else {
-				if (!wcfg.isLogging(Logging.NATURALSTRUCTUREGROW))
+				if (!wcfg.isLogging(Logging.NATURALSTRUCTUREGROW)) {
 					return;
+				}
 				playerName = "NaturalGrow";
 			}
-			for (final BlockState state : event.getBlocks())
-				consumer.queueBlockReplace(playerName, state.getBlock().getState(), state);
+			for (final BlockState state : event.getBlocks()) {
+				this.consumer.queueBlockReplace(playerName, state.getBlock().getState(), state);
+			}
 		}
 	}
 }

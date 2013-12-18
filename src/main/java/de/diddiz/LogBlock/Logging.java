@@ -23,6 +23,6 @@ public enum Logging
 	}
 
 	public boolean isDefaultEnabled() {
-		return defaultEnabled;
+		return this.defaultEnabled;
 	}
 }

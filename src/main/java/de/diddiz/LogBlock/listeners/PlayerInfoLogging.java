@@ -14,11 +14,11 @@ public class PlayerInfoLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		consumer.queueJoin(event.getPlayer());
+		this.consumer.queueJoin(event.getPlayer());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		consumer.queueLeave(event.getPlayer());
+		this.consumer.queueLeave(event.getPlayer());
 	}
 }

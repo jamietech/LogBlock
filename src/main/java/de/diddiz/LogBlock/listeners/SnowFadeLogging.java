@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockFadeEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 
 public class SnowFadeLogging extends LoggingListener
 {
@@ -15,10 +16,11 @@ public class SnowFadeLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockFade(BlockFadeEvent event) {
-		if (isLogging(event.getBlock().getWorld(), Logging.SNOWFADE)) {
+		if (Config.isLogging(event.getBlock().getWorld(), Logging.SNOWFADE)) {
 			final int type = event.getBlock().getTypeId();
-			if (type == 78 || type == 79)
-				consumer.queueBlockReplace("SnowFade", event.getBlock().getState(), event.getNewState());
+			if ((type == 78) || (type == 79)) {
+				this.consumer.queueBlockReplace("SnowFade", event.getBlock().getState(), event.getNewState());
+			}
 		}
 	}
 }

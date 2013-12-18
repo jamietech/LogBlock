@@ -9,6 +9,6 @@ public class LoggingListener implements Listener
 	protected final Consumer consumer;
 
 	public LoggingListener(LogBlock lb) {
-		consumer = lb.getConsumer();
+		this.consumer = lb.getConsumer();
 	}
 }

@@ -27,7 +27,7 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	public Location getLocation() {
 
-		return location;
+		return this.location;
 	}
 
 	public void setLocation(Location location) {
@@ -37,7 +37,7 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	public int getTypeBefore() {
 
-		return typeBefore;
+		return this.typeBefore;
 	}
 
 	public void setTypeBefore(int typeBefore) {
@@ -47,7 +47,7 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	public int getTypeAfter() {
 
-		return typeAfter;
+		return this.typeAfter;
 	}
 
 	public void setTypeAfter(int typeAfter) {
@@ -57,7 +57,7 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	public byte getData() {
 
-		return data;
+		return this.data;
 	}
 
 	public void setData(byte data) {
@@ -67,14 +67,14 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	public String getSignText() {
 
-		return signText;
+		return this.signText;
 	}
 
 	public void setSignText(String[] signText) {
 
 		if (signText != null) {
 			// Check for block
-			Validate.isTrue(isValidSign(), "Must be valid sign block");
+			Validate.isTrue(this.isValidSign(), "Must be valid sign block");
 
 			// Check for problems
 			Validate.noNullElements(signText, "No null lines");
@@ -88,15 +88,21 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 
 	private boolean isValidSign() {
 
-		if ((typeAfter == 63 || typeAfter == 68) && typeBefore == 0) return true;
-		if ((typeBefore == 63 || typeBefore == 68) && typeAfter == 0) return true;
-		if ((typeAfter == 63 || typeAfter == 68) && typeBefore == typeAfter) return true;
+		if (((this.typeAfter == 63) || (this.typeAfter == 68)) && (this.typeBefore == 0)) {
+			return true;
+		}
+		if (((this.typeBefore == 63) || (this.typeBefore == 68)) && (this.typeAfter == 0)) {
+			return true;
+		}
+		if (((this.typeAfter == 63) || (this.typeAfter == 68)) && (this.typeBefore == this.typeAfter)) {
+			return true;
+		}
 		return false;
 	}
 
 	public ChestAccess getChestAccess() {
 
-		return chestAccess;
+		return this.chestAccess;
 	}
 
 	public void setChestAccess(ChestAccess chestAccess) {
@@ -104,13 +110,14 @@ public class BlockChangePreLogEvent extends PreLogEvent {
 		this.chestAccess = chestAccess;
 	}
 
+	@Override
 	public HandlerList getHandlers() {
 
-		return handlers;
+		return BlockChangePreLogEvent.handlers;
 	}
 
 	public static HandlerList getHandlerList() {
 
-		return handlers;
+		return BlockChangePreLogEvent.handlers;
 	}
 }

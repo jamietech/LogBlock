@@ -9,8 +9,8 @@ public class ToolData
 	public ToolMode mode;
 
 	public ToolData(Tool tool, LogBlock logblock, Player player) {
-		enabled = tool.defaultEnabled && logblock.hasPermission(player, "logblock.tools." + tool.name);
-		params = tool.params.clone();
-		mode = tool.mode;
+		this.enabled = tool.defaultEnabled && logblock.hasPermission(player, "logblock.tools." + tool.name);
+		this.params = tool.params.clone();
+		this.mode = tool.mode;
 	}
 }

@@ -2,6 +2,9 @@ package de.diddiz.LogBlock;
 
 import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.events.BlockChangePreLogEvent;
+import de.diddiz.util.BukkitUtils;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
@@ -46,7 +49,7 @@ public class Consumer extends TimerTask
 	 * Logs any block change. Don't try to combine broken and placed blocks. Queue two block changes or use the queueBLockReplace methods.
 	 */
 	public void queueBlock(String playerName, Location loc, int typeBefore, int typeAfter, byte data) {
-		queueBlock(playerName, loc, typeBefore, typeAfter, data, null, null);
+		this.queueBlock(playerName, loc, typeBefore, typeAfter, data, null, null);
 	}
 
 	/**
@@ -56,14 +59,14 @@ public class Consumer extends TimerTask
 	 * Blockstate of the block before actually being destroyed.
 	 */
 	public void queueBlockBreak(String playerName, BlockState before) {
-		queueBlockBreak(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData());
+		this.queueBlockBreak(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData());
 	}
 
 	/**
 	 * Logs a block break. The block type afterwards is assumed to be o (air).
 	 */
 	public void queueBlockBreak(String playerName, Location loc, int typeBefore, byte dataBefore) {
-		queueBlock(playerName, loc, typeBefore, 0, dataBefore);
+		this.queueBlock(playerName, loc, typeBefore, 0, dataBefore);
 	}
 
 	/**
@@ -73,14 +76,14 @@ public class Consumer extends TimerTask
 	 * Blockstate of the block after actually being placed.
 	 */
 	public void queueBlockPlace(String playerName, BlockState after) {
-		queueBlockPlace(playerName, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), after.getBlock().getTypeId(), after.getBlock().getData());
+		this.queueBlockPlace(playerName, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), after.getBlock().getTypeId(), after.getBlock().getData());
 	}
 
 	/**
 	 * Logs a block place. The block type before is assumed to be o (air).
 	 */
 	public void queueBlockPlace(String playerName, Location loc, int type, byte data) {
-		queueBlock(playerName, loc, 0, type, data);
+		this.queueBlock(playerName, loc, 0, type, data);
 	}
 
 	/**
@@ -90,7 +93,7 @@ public class Consumer extends TimerTask
 	 * Blockstate of the block after actually being placed.
 	 */
 	public void queueBlockReplace(String playerName, BlockState before, BlockState after) {
-		queueBlockReplace(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), after.getTypeId(), after.getRawData());
+		this.queueBlockReplace(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), after.getTypeId(), after.getRawData());
 	}
 
 	/**
@@ -98,7 +101,7 @@ public class Consumer extends TimerTask
 	 * Blockstate of the block before actually being destroyed.
 	 */
 	public void queueBlockReplace(String playerName, BlockState before, int typeAfter, byte dataAfter) {
-		queueBlockReplace(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), typeAfter, dataAfter);
+		this.queueBlockReplace(playerName, new Location(before.getWorld(), before.getX(), before.getY(), before.getZ()), before.getTypeId(), before.getRawData(), typeAfter, dataAfter);
 	}
 
 	/**
@@ -106,15 +109,15 @@ public class Consumer extends TimerTask
 	 * Blockstate of the block after actually being placed.
 	 */
 	public void queueBlockReplace(String playerName, int typeBefore, byte dataBefore, BlockState after) {
-		queueBlockReplace(playerName, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), typeBefore, dataBefore, after.getTypeId(), after.getRawData());
+		this.queueBlockReplace(playerName, new Location(after.getWorld(), after.getX(), after.getY(), after.getZ()), typeBefore, dataBefore, after.getTypeId(), after.getRawData());
 	}
 
 	public void queueBlockReplace(String playerName, Location loc, int typeBefore, byte dataBefore, int typeAfter, byte dataAfter) {
-		if (dataBefore == 0 && (typeBefore != typeAfter))
-			queueBlock(playerName, loc, typeBefore, typeAfter, dataAfter);
-		else {
-			queueBlockBreak(playerName, loc, typeBefore, dataBefore);
-			queueBlockPlace(playerName, loc, typeAfter, dataAfter);
+		if ((dataBefore == 0) && (typeBefore != typeAfter)) {
+			this.queueBlock(playerName, loc, typeBefore, typeAfter, dataAfter);
+		} else {
+			this.queueBlockBreak(playerName, loc, typeBefore, dataBefore);
+			this.queueBlockPlace(playerName, loc, typeAfter, dataAfter);
 		}
 	}
 
@@ -123,9 +126,10 @@ public class Consumer extends TimerTask
 	 * The respective container. Must be an instance of an InventoryHolder.
 	 */
 	public void queueChestAccess(String playerName, BlockState container, short itemType, short itemAmount, short itemData) {
-		if (!(container instanceof InventoryHolder))
+		if (!(container instanceof InventoryHolder)) {
 			return;
-		queueChestAccess(playerName, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), itemType, itemAmount, itemData);
+		}
+		this.queueChestAccess(playerName, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), itemType, itemAmount, itemData);
 	}
 
 	/**
@@ -133,7 +137,7 @@ public class Consumer extends TimerTask
 	 * Type id of the container.
 	 */
 	public void queueChestAccess(String playerName, Location loc, int type, short itemType, short itemAmount, short itemData) {
-		queueBlock(playerName, loc, type, type, (byte)0, null, new ChestAccess(itemType, itemAmount, itemData));
+		this.queueBlock(playerName, loc, type, type, (byte)0, null, new ChestAccess(itemType, itemAmount, itemData));
 	}
 
 	/**
@@ -143,19 +147,21 @@ public class Consumer extends TimerTask
 	 * Must be an instance of InventoryHolder
 	 */
 	public void queueContainerBreak(String playerName, BlockState container) {
-		if (!(container instanceof InventoryHolder))
+		if (!(container instanceof InventoryHolder)) {
 			return;
-		queueContainerBreak(playerName, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), container.getRawData(), ((InventoryHolder)container).getInventory());
+		}
+		this.queueContainerBreak(playerName, new Location(container.getWorld(), container.getX(), container.getY(), container.getZ()), container.getTypeId(), container.getRawData(), ((InventoryHolder)container).getInventory());
 	}
 
 	/**
 	 * Logs a container block break. The block type before is assumed to be o (air). All content is assumed to be taken.
 	 */
 	public void queueContainerBreak(String playerName, Location loc, int type, byte data, Inventory inv) {
-		final ItemStack[] items = compressInventory(inv.getContents());
-		for (final ItemStack item : items)
-			queueChestAccess(playerName, loc, type, (short)item.getTypeId(), (short)(item.getAmount() * -1), rawData(item));
-		queueBlockBreak(playerName, loc, type, data);
+		final ItemStack[] items = BukkitUtils.compressInventory(inv.getContents());
+		for (final ItemStack item : items) {
+			this.queueChestAccess(playerName, loc, type, (short)item.getTypeId(), (short)(item.getAmount() * -1), BukkitUtils.rawData(item));
+		}
+		this.queueBlockBreak(playerName, loc, type, data);
 	}
 
 	/**
@@ -165,12 +171,14 @@ public class Consumer extends TimerTask
 	 * Can't be null
 	 */
 	public void queueKill(Entity killer, Entity victim) {
-		if (killer == null || victim == null)
+		if ((killer == null) || (victim == null)) {
 			return;
+		}
 		int weapon = 0;
-		if (killer instanceof Player && ((Player)killer).getItemInHand() != null)
+		if ((killer instanceof Player) && (((Player)killer).getItemInHand() != null)) {
 			weapon = ((Player)killer).getItemInHand().getTypeId();
-		queueKill(victim.getLocation(), entityName(killer), entityName(victim), weapon);
+		}
+		this.queueKill(victim.getLocation(), BukkitUtils.entityName(killer), BukkitUtils.entityName(victim), weapon);
 	}
 
 	/**
@@ -181,9 +189,10 @@ public class Consumer extends TimerTask
 	 * Can't be null
 	 */
 	public void queueKill(String killer, Entity victim) {
-		if (killer == null || victim == null)
+		if ((killer == null) || (victim == null)) {
 			return;
-		queueKill(victim.getLocation(), killer, entityName(victim), 0);
+		}
+		this.queueKill(victim.getLocation(), killer, BukkitUtils.entityName(victim), 0);
 	}
 
 	/**
@@ -199,7 +208,7 @@ public class Consumer extends TimerTask
 	 */
 	@Deprecated
 	public void queueKill(World world, String killerName, String victimName, int weapon) {
-		queueKill(new Location(world, 0, 0, 0), killerName, victimName, weapon);
+		this.queueKill(new Location(world, 0, 0, 0), killerName, victimName, weapon);
 	}
 
 	/**
@@ -213,9 +222,10 @@ public class Consumer extends TimerTask
 	 * Item id of the weapon. 0 for no weapon.
 	 */
 	public void queueKill(Location location, String killerName, String victimName, int weapon) {
-		if (victimName == null || !isLogged(location.getWorld()))
+		if ((victimName == null) || !Config.isLogged(location.getWorld())) {
 			return;
-		queue.add(new KillRow(location, killerName == null ? null : killerName.replaceAll("[^a-zA-Z0-9_]", ""), victimName.replaceAll("[^a-zA-Z0-9_]", ""), weapon));
+		}
+		this.queue.add(new KillRow(location, killerName == null ? null : killerName.replaceAll("[^a-zA-Z0-9_]", ""), victimName.replaceAll("[^a-zA-Z0-9_]", ""), weapon));
 	}
 
 	/**
@@ -225,13 +235,14 @@ public class Consumer extends TimerTask
 	 * The four lines on the sign.
 	 */
 	public void queueSignBreak(String playerName, Location loc, int type, byte data, String[] lines) {
-		if (type != 63 && type != 68 || lines == null || lines.length != 4)
+		if (((type != 63) && (type != 68)) || (lines == null) || (lines.length != 4)) {
 			return;
-		queueBlock(playerName, loc, type, 0, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
+		}
+		this.queueBlock(playerName, loc, type, 0, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
 	}
 
 	public void queueSignBreak(String playerName, Sign sign) {
-		queueSignBreak(playerName, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
+		this.queueSignBreak(playerName, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
 	}
 
 	/**
@@ -241,99 +252,106 @@ public class Consumer extends TimerTask
 	 * The four lines on the sign.
 	 */
 	public void queueSignPlace(String playerName, Location loc, int type, byte data, String[] lines) {
-		if (type != 63 && type != 68 || lines == null || lines.length != 4)
+		if (((type != 63) && (type != 68)) || (lines == null) || (lines.length != 4)) {
 			return;
-		queueBlock(playerName, loc, 0, type, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
+		}
+		this.queueBlock(playerName, loc, 0, type, data, lines[0] + "\0" + lines[1] + "\0" + lines[2] + "\0" + lines[3], null);
 	}
 
 	public void queueSignPlace(String playerName, Sign sign) {
-		queueSignPlace(playerName, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
+		this.queueSignPlace(playerName, new Location(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()), sign.getTypeId(), sign.getRawData(), sign.getLines());
 	}
 
 	public void queueChat(String player, String message) {
-		for (String ignored : Config.ignoredChat) {
+		for (final String ignored : Config.ignoredChat) {
 			if (message.startsWith(ignored)) {
 				return;
 			}
 		}
-		queue.add(new ChatRow(player, message));
+		this.queue.add(new ChatRow(player, message));
 	}
 
 	public void queueJoin(Player player) {
-		queue.add(new PlayerJoinRow(player));
+		this.queue.add(new PlayerJoinRow(player));
 	}
 
 	public void queueLeave(Player player) {
-		queue.add(new PlayerLeaveRow(player));
+		this.queue.add(new PlayerLeaveRow(player));
 	}
 
 	@Override
 	public void run() {
-		if (queue.isEmpty() || !lock.tryLock())
+		if (this.queue.isEmpty() || !this.lock.tryLock()) {
 			return;
-		final Connection conn = logblock.getConnection();
+		}
+		final Connection conn = this.logblock.getConnection();
 		Statement state = null;
-		if (Config.queueWarningSize > 0 && queue.size() >= Config.queueWarningSize) {
-			getLogger().info("[Consumer] Queue overloaded. Size: " + getQueueSize());
+		if ((Config.queueWarningSize > 0) && (this.queue.size() >= Config.queueWarningSize)) {
+			Bukkit.getLogger().info("[Consumer] Queue overloaded. Size: " + this.getQueueSize());
 		}
 
 		try {
-			if (conn == null)
+			if (conn == null) {
 				return;
+			}
 			conn.setAutoCommit(false);
 			state = conn.createStatement();
 			final long start = System.currentTimeMillis();
 			int count = 0;
 			process:
-			while (!queue.isEmpty() && (System.currentTimeMillis() - start < timePerRun || count < forceToProcessAtLeast)) {
-				final Row r = queue.poll();
-				if (r == null)
+			while (!this.queue.isEmpty() && (((System.currentTimeMillis() - start) < Config.timePerRun) || (count < Config.forceToProcessAtLeast))) {
+				final Row r = this.queue.poll();
+				if (r == null) {
 					continue;
+				}
 				for (final String player : r.getPlayers()) {
-					if (!playerIds.containsKey(player)) {
-						if (!addPlayer(state, player)) {
-							if (!failedPlayers.contains(player)) {
-								failedPlayers.add(player);
-								getLogger().warning("[Consumer] Failed to add player " + player);
+					if (!this.playerIds.containsKey(player)) {
+						if (!this.addPlayer(state, player)) {
+							if (!this.failedPlayers.contains(player)) {
+								this.failedPlayers.add(player);
+								Bukkit.getLogger().warning("[Consumer] Failed to add player " + player);
 							}
 							continue process;
 						}
 					}
 				}
 				if (r instanceof PreparedStatementRow) {
-					PreparedStatementRow PSRow = (PreparedStatementRow) r;
+					final PreparedStatementRow PSRow = (PreparedStatementRow) r;
 					PSRow.setConnection(conn);
 					try {
 						PSRow.executeStatements();
 					} catch (final SQLException ex) {
-						getLogger().log(Level.SEVERE, "[Consumer] SQL exception on insertion: ", ex);
+						Bukkit.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on insertion: ", ex);
 						break;
 					}
 				} else {
-					for (final String insert : r.getInserts())
+					for (final String insert : r.getInserts()) {
 						try {
 							state.execute(insert);
 						} catch (final SQLException ex) {
-							getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + insert + ": ", ex);
+							Bukkit.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on " + insert + ": ", ex);
 							break process;
 						}
+					}
 				}
 
 				count++;
 			}
 			conn.commit();
 		} catch (final SQLException ex) {
-			getLogger().log(Level.SEVERE, "[Consumer] SQL exception", ex);
+			Bukkit.getLogger().log(Level.SEVERE, "[Consumer] SQL exception", ex);
 		} finally {
 			try {
-				if (state != null)
+				if (state != null) {
 					state.close();
-				if (conn != null)
+				}
+				if (conn != null) {
 					conn.close();
+				}
 			} catch (final SQLException ex) {
-				getLogger().log(Level.SEVERE, "[Consumer] SQL exception on close", ex);
+				Bukkit.getLogger().log(Level.SEVERE, "[Consumer] SQL exception on close", ex);
 			}
-			lock.unlock();
+			this.lock.unlock();
 		}
 	}
 
@@ -343,38 +361,41 @@ public class Consumer extends TimerTask
 		int counter = 0;
 		new File("plugins/LogBlock/import/").mkdirs();
 		PrintWriter writer = new PrintWriter(new File("plugins/LogBlock/import/queue-" + time + "-0.sql"));
-		while (!queue.isEmpty()) {
-			final Row r = queue.poll();
-			if (r == null)
+		while (!this.queue.isEmpty()) {
+			final Row r = this.queue.poll();
+			if (r == null) {
 				continue;
-			for (final String player : r.getPlayers())
-				if (!playerIds.containsKey(player) && !insertedPlayers.contains(player)) {
+			}
+			for (final String player : r.getPlayers()) {
+				if (!this.playerIds.containsKey(player) && !insertedPlayers.contains(player)) {
 					// Odd query contruction is to work around innodb auto increment behaviour - bug #492
 					writer.println("INSERT IGNORE INTO `lb-players` (playername) SELECT '" + player + "' FROM `lb-players` WHERE NOT EXISTS (SELECT NULL FROM `lb-players` WHERE playername = '" + player + "') LIMIT 1;");
 					insertedPlayers.add(player);
 				}
-			for (final String insert : r.getInserts())
+			}
+			for (final String insert : r.getInserts()) {
 				writer.println(insert);
+			}
 			counter++;
-			if (counter % 1000 == 0) {
+			if ((counter % 1000) == 0) {
 				writer.close();
-				writer = new PrintWriter(new File("plugins/LogBlock/import/queue-" + time + "-" + counter / 1000 + ".sql"));
+				writer = new PrintWriter(new File("plugins/LogBlock/import/queue-" + time + "-" + (counter / 1000) + ".sql"));
 			}
 		}
 		writer.close();
 	}
 
 	int getQueueSize() {
-		return queue.size();
+		return this.queue.size();
 	}
 
 	static boolean hide(Player player) {
 		final String playerName = player.getName().toLowerCase();
-		if (hiddenPlayers.contains(playerName)) {
-			hiddenPlayers.remove(playerName);
+		if (Config.hiddenPlayers.contains(playerName)) {
+			Config.hiddenPlayers.remove(playerName);
 			return false;
 		}
-		hiddenPlayers.add(playerName);
+		Config.hiddenPlayers.add(playerName);
 		return true;
 	}
 
@@ -382,19 +403,22 @@ public class Consumer extends TimerTask
 		// Odd query contruction is to work around innodb auto increment behaviour - bug #492
 		state.execute("INSERT IGNORE INTO `lb-players` (playername) SELECT '" + playerName + "' FROM `lb-players` WHERE NOT EXISTS (SELECT NULL FROM `lb-players` WHERE playername = '" + playerName + "') LIMIT 1;");
 		final ResultSet rs = state.executeQuery("SELECT playerid FROM `lb-players` WHERE playername = '" + playerName + "'");
-		if (rs.next())
-			playerIds.put(playerName, rs.getInt(1));
+		if (rs.next()) {
+			this.playerIds.put(playerName, rs.getInt(1));
+		}
 		rs.close();
-		return playerIds.containsKey(playerName);
+		return this.playerIds.containsKey(playerName);
 	}
 
 	private void queueBlock(String playerName, Location loc, int typeBefore, int typeAfter, byte data, String signtext, ChestAccess ca) {
 
 		if (Config.fireCustomEvents) {
 			// Create and call the event
-			BlockChangePreLogEvent event = new BlockChangePreLogEvent(playerName, loc, typeBefore, typeAfter, data, signtext, ca);
-			logblock.getServer().getPluginManager().callEvent(event);
-			if (event.isCancelled()) return;
+			final BlockChangePreLogEvent event = new BlockChangePreLogEvent(playerName, loc, typeBefore, typeAfter, data, signtext, ca);
+			this.logblock.getServer().getPluginManager().callEvent(event);
+			if (event.isCancelled()) {
+				return;
+			}
 
 			// Update variables
 			playerName = event.getOwner();
@@ -406,16 +430,20 @@ public class Consumer extends TimerTask
 			ca = event.getChestAccess();
 		}
 		// Do this last so LogBlock still has final say in what is being added
-		if (playerName == null || loc == null || typeBefore < 0 || typeAfter < 0 || (Config.safetyIdCheck && (typeBefore > 255 || typeAfter > 255)) || hiddenPlayers.contains(playerName.toLowerCase()) || !isLogged(loc.getWorld()) || typeBefore != typeAfter && hiddenBlocks.contains(typeBefore) && hiddenBlocks.contains(typeAfter)) return;
-		queue.add(new BlockRow(loc, playerName.replaceAll("[^a-zA-Z0-9_]", ""), typeBefore, typeAfter, data, signtext, ca));
+		if ((playerName == null) || (loc == null) || (typeBefore < 0) || (typeAfter < 0) || (Config.safetyIdCheck && ((typeBefore > 255) || (typeAfter > 255))) || Config.hiddenPlayers.contains(playerName.toLowerCase()) || !Config.isLogged(loc.getWorld()) || ((typeBefore != typeAfter) && Config.hiddenBlocks.contains(typeBefore) && Config.hiddenBlocks.contains(typeAfter))) {
+			return;
+		}
+		this.queue.add(new BlockRow(loc, playerName.replaceAll("[^a-zA-Z0-9_]", ""), typeBefore, typeAfter, data, signtext, ca));
 	}
 
 	private String playerID(String playerName) {
-		if (playerName == null)
+		if (playerName == null) {
 			return "NULL";
-		final Integer id = playerIds.get(playerName);
-		if (id != null)
+		}
+		final Integer id = this.playerIds.get(playerName);
+		if (id != null) {
 			return id.toString();
+		}
 		return "(SELECT playerid FROM `lb-players` WHERE playername = '" + playerName + "')";
 	}
 
@@ -423,7 +451,7 @@ public class Consumer extends TimerTask
 		if (playerName == null) {
 			return null;
 		}
-		return playerIds.get(playerName);
+		return this.playerIds.get(playerName);
 	}
 
 	private static interface Row
@@ -451,20 +479,21 @@ public class Consumer extends TimerTask
 
 		@Override
 		public String[] getInserts() {
-			final String table = getWorldConfig(loc.getWorld()).table;
-			final String[] inserts = new String[ca != null || signtext != null ? 2 : 1];
-			inserts[0] = "INSERT INTO `" + table + "` (date, playerid, replaced, type, data, x, y, z) VALUES (FROM_UNIXTIME(" + date + "), " + playerID(playerName) + ", " + replaced + ", " + type + ", " + data + ", '" + loc.getBlockX() + "', " + loc.getBlockY() + ", '" + loc.getBlockZ() + "');";
-			if (signtext != null) {
-				inserts[1] = "INSERT INTO `" + table + "-sign` (id, signtext) values (LAST_INSERT_ID(), '" + signtext.replace("\\", "\\\\").replace("'", "\\'") + "');";
+			final String table = Config.getWorldConfig(this.loc.getWorld()).table;
+			final String[] inserts = new String[(this.ca != null) || (this.signtext != null) ? 2 : 1];
+			inserts[0] = "INSERT INTO `" + table + "` (date, playerid, replaced, type, data, x, y, z) VALUES (FROM_UNIXTIME(" + this.date + "), " + Consumer.this.playerID(this.playerName) + ", " + this.replaced + ", " + this.type + ", " + this.data + ", '" + this.loc.getBlockX() + "', " + this.loc.getBlockY() + ", '" + this.loc.getBlockZ() + "');";
+			if (this.signtext != null) {
+				inserts[1] = "INSERT INTO `" + table + "-sign` (id, signtext) values (LAST_INSERT_ID(), '" + this.signtext.replace("\\", "\\\\").replace("'", "\\'") + "');";
 			}
-			else if (ca != null)
-				inserts[1] = "INSERT INTO `" + table + "-chest` (id, itemtype, itemamount, itemdata) values (LAST_INSERT_ID(), " + ca.itemType + ", " + ca.itemAmount + ", " + ca.itemData + ");";
+			else if (this.ca != null) {
+				inserts[1] = "INSERT INTO `" + table + "-chest` (id, itemtype, itemamount, itemdata) values (LAST_INSERT_ID(), " + this.ca.itemType + ", " + this.ca.itemAmount + ", " + this.ca.itemData + ");";
+			}
 			return inserts;
 		}
 
 		@Override
 		public String[] getPlayers() {
-			return new String[]{playerName};
+			return new String[]{this.playerName};
 		}
 
 		@Override
@@ -474,36 +503,36 @@ public class Consumer extends TimerTask
 
 		@Override
 		public void executeStatements() throws SQLException {
-			final String table = getWorldConfig(loc.getWorld()).table;
+			final String table = Config.getWorldConfig(this.loc.getWorld()).table;
 
 			PreparedStatement ps1 = null;
 			PreparedStatement ps = null;
 			try {
-				ps1 = connection.prepareStatement("INSERT INTO `" + table + "` (date, playerid, replaced, type, data, x, y, z) VALUES(FROM_UNIXTIME(?), " + playerID(playerName) + ", ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-				ps1.setLong(1, date );
-				ps1.setInt(2, replaced);
-				ps1.setInt(3, type);
-				ps1.setInt(4, data);
-				ps1.setInt(5, loc.getBlockX());
-				ps1.setInt(6, loc.getBlockY());
-				ps1.setInt(7, loc.getBlockZ());
+				ps1 = this.connection.prepareStatement("INSERT INTO `" + table + "` (date, playerid, replaced, type, data, x, y, z) VALUES(FROM_UNIXTIME(?), " + Consumer.this.playerID(this.playerName) + ", ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				ps1.setLong(1, this.date );
+				ps1.setInt(2, this.replaced);
+				ps1.setInt(3, this.type);
+				ps1.setInt(4, this.data);
+				ps1.setInt(5, this.loc.getBlockX());
+				ps1.setInt(6, this.loc.getBlockY());
+				ps1.setInt(7, this.loc.getBlockZ());
 				ps1.executeUpdate();
 	
 				int id;
-				ResultSet rs = ps1.getGeneratedKeys();
+				final ResultSet rs = ps1.getGeneratedKeys();
 				rs.next();
 				id = rs.getInt(1);
 	
-				if (signtext != null) {
-					ps = connection.prepareStatement("INSERT INTO `" + table + "-sign` (signtext, id) VALUES(?, ?)");
-					ps.setString(1, signtext);
+				if (this.signtext != null) {
+					ps = this.connection.prepareStatement("INSERT INTO `" + table + "-sign` (signtext, id) VALUES(?, ?)");
+					ps.setString(1, this.signtext);
 					ps.setInt(2, id);
 					ps.executeUpdate();
-				} else if (ca != null) {
-					ps = connection.prepareStatement("INSERT INTO `" + table + "-chest` (itemtype, itemamount, itemdata, id) values (?, ?, ?, ?)");
-					ps.setInt(1, ca.itemType);
-					ps.setInt(2, ca.itemAmount);
-					ps.setInt(3, ca.itemData);
+				} else if (this.ca != null) {
+					ps = this.connection.prepareStatement("INSERT INTO `" + table + "-chest` (itemtype, itemamount, itemdata, id) values (?, ?, ?, ?)");
+					ps.setInt(1, this.ca.itemType);
+					ps.setInt(2, this.ca.itemAmount);
+					ps.setInt(3, this.ca.itemData);
 					ps.setInt(4, id);
 					ps.executeUpdate();
 				}
@@ -515,7 +544,7 @@ public class Consumer extends TimerTask
 					try {
 						ps1.close();
 					}
-					catch(SQLException e) {
+					catch(final SQLException e) {
 						// ideally should log to logger, none is available in this class
 						// at the time of this writing, so I'll leave that to the plugin
 						// maintainers to integrate if they wish
@@ -527,7 +556,7 @@ public class Consumer extends TimerTask
 					try {
 						ps.close();
 					}
-					catch(SQLException e) {
+					catch(final SQLException e) {
 						e.printStackTrace();
 					}
 				}
@@ -543,21 +572,21 @@ public class Consumer extends TimerTask
 		final Location loc;
 
 		KillRow(Location loc, String attacker, String defender, int weapon) {
-			date = System.currentTimeMillis() / 1000;
+			this.date = System.currentTimeMillis() / 1000;
 			this.loc = loc;
-			killer = attacker;
-			victim = defender;
+			this.killer = attacker;
+			this.victim = defender;
 			this.weapon = weapon;
 		}
 
 		@Override
 		public String[] getInserts() {
-			return new String[]{"INSERT INTO `" + getWorldConfig(loc.getWorld()).table + "-kills` (date, killer, victim, weapon, x, y, z) VALUES (FROM_UNIXTIME(" + date + "), " + playerID(killer) + ", " + playerID(victim) + ", " + weapon + ", " + loc.getBlockX() + ", " + (loc.getBlockY() < 0 ? 0 : loc.getBlockY()) + ", " + loc.getBlockZ() + ");"};
+			return new String[]{"INSERT INTO `" + Config.getWorldConfig(this.loc.getWorld()).table + "-kills` (date, killer, victim, weapon, x, y, z) VALUES (FROM_UNIXTIME(" + this.date + "), " + Consumer.this.playerID(this.killer) + ", " + Consumer.this.playerID(this.victim) + ", " + this.weapon + ", " + this.loc.getBlockX() + ", " + (this.loc.getBlockY() < 0 ? 0 : this.loc.getBlockY()) + ", " + this.loc.getBlockZ() + ");"};
 		}
 
 		@Override
 		public String[] getPlayers() {
-			return new String[]{killer, victim};
+			return new String[]{this.killer, this.victim};
 		}
 	}
 
@@ -571,12 +600,12 @@ public class Consumer extends TimerTask
 
 		@Override
 		public String[] getInserts() {
-			return new String[]{"INSERT INTO `lb-chat` (date, playerid, message) VALUES (FROM_UNIXTIME(" + date + "), " + playerID(playerName) + ", '" + message.replace("\\", "\\\\").replace("'", "\\'") + "');"};
+			return new String[]{"INSERT INTO `lb-chat` (date, playerid, message) VALUES (FROM_UNIXTIME(" + this.date + "), " + Consumer.this.playerID(this.playerName) + ", '" + this.message.replace("\\", "\\\\").replace("'", "\\'") + "');"};
 		}
 
 		@Override
 		public String[] getPlayers() {
-			return new String[]{playerName};
+			return new String[]{this.playerName};
 		}
 
 		@Override
@@ -590,9 +619,9 @@ public class Consumer extends TimerTask
 			Integer id;
 
 			String sql = "INSERT INTO `lb-chat` (date, playerid, message) VALUES (FROM_UNIXTIME(?), ";
-			if ((id = playerIDAsInt(playerName)) == null) {
+			if ((id = Consumer.this.playerIDAsInt(this.playerName)) == null) {
 				noID = true;
-				sql += playerID(playerName) + ", ";
+				sql += Consumer.this.playerID(this.playerName) + ", ";
 			} else {
 				sql += "?, ";
 			}
@@ -600,13 +629,13 @@ public class Consumer extends TimerTask
 			
 			PreparedStatement ps = null;
 			try {
-				ps = connection.prepareStatement(sql);
-				ps.setLong(1, date);
+				ps = this.connection.prepareStatement(sql);
+				ps.setLong(1, this.date);
 				if (!noID) {
 					ps.setInt(2, id);
-					ps.setString(3, message);
+					ps.setString(3, this.message);
 				} else {
-					ps.setString(2, message);
+					ps.setString(2, this.message);
 				}
 				ps.execute();
 			}
@@ -616,7 +645,7 @@ public class Consumer extends TimerTask
 					try {
 						ps.close();
 					}
-					catch(SQLException e) {
+					catch(final SQLException e) {
 						// should print to a Logger instead if one is ever added to this class
 						e.printStackTrace();
 					}
@@ -632,19 +661,19 @@ public class Consumer extends TimerTask
 		private final String ip;
 
 		PlayerJoinRow(Player player) {
-			playerName = player.getName();
-			lastLogin = System.currentTimeMillis() / 1000;
-			ip = player.getAddress().toString().replace("'", "\\'");
+			this.playerName = player.getName();
+			this.lastLogin = System.currentTimeMillis() / 1000;
+			this.ip = player.getAddress().toString().replace("'", "\\'");
 		}
 
 		@Override
 		public String[] getInserts() {
-			return new String[]{"UPDATE `lb-players` SET lastlogin = FROM_UNIXTIME(" + lastLogin + "), firstlogin = IF(firstlogin = 0, FROM_UNIXTIME(" + lastLogin + "), firstlogin), ip = '" + ip + "' WHERE " + (playerIds.containsKey(playerName) ? "playerid = " + playerIds.get(playerName) : "playerName = '" + playerName + "'") + ";"};
+			return new String[]{"UPDATE `lb-players` SET lastlogin = FROM_UNIXTIME(" + this.lastLogin + "), firstlogin = IF(firstlogin = 0, FROM_UNIXTIME(" + this.lastLogin + "), firstlogin), ip = '" + this.ip + "' WHERE " + (Consumer.this.playerIds.containsKey(this.playerName) ? "playerid = " + Consumer.this.playerIds.get(this.playerName) : "playerName = '" + this.playerName + "'") + ";"};
 		}
 
 		@Override
 		public String[] getPlayers() {
-			return new String[]{playerName};
+			return new String[]{this.playerName};
 		}
 	}
 
@@ -654,18 +683,18 @@ public class Consumer extends TimerTask
 		private final long leaveTime;
 
 		PlayerLeaveRow(Player player) {
-			playerName = player.getName();
-			leaveTime = System.currentTimeMillis() / 1000;
+			this.playerName = player.getName();
+			this.leaveTime = System.currentTimeMillis() / 1000;
 		}
 
 		@Override
 		public String[] getInserts() {
-			return new String[]{"UPDATE `lb-players` SET onlinetime = onlinetime + TIMESTAMPDIFF(SECOND, lastlogin, FROM_UNIXTIME('" + leaveTime + "')) WHERE lastlogin > 0 && " + (playerIds.containsKey(playerName) ? "playerid = " + playerIds.get(playerName) : "playerName = '" + playerName + "'") + ";"};
+			return new String[]{"UPDATE `lb-players` SET onlinetime = onlinetime + TIMESTAMPDIFF(SECOND, lastlogin, FROM_UNIXTIME('" + this.leaveTime + "')) WHERE lastlogin > 0 && " + (Consumer.this.playerIds.containsKey(this.playerName) ? "playerid = " + Consumer.this.playerIds.get(this.playerName) : "playerName = '" + this.playerName + "'") + ";"};
 		}
 
 		@Override
 		public String[] getPlayers() {
-			return new String[]{playerName};
+			return new String[]{this.playerName};
 		}
 	}
 }

@@ -112,21 +112,21 @@ public class Metrics {
         this.plugin = plugin;
 
         // load the config
-        configurationFile = new File(CONFIG_FILE);
-        configuration = YamlConfiguration.loadConfiguration(configurationFile);
+        this.configurationFile = new File(Metrics.CONFIG_FILE);
+        this.configuration = YamlConfiguration.loadConfiguration(this.configurationFile);
 
         // add some defaults
-        configuration.addDefault("opt-out", false);
-        configuration.addDefault("guid", UUID.randomUUID().toString());
+        this.configuration.addDefault("opt-out", false);
+        this.configuration.addDefault("guid", UUID.randomUUID().toString());
 
         // Do we need to create the file?
-        if (configuration.get("guid", null) == null) {
-            configuration.options().header("http://mcstats.org").copyDefaults(true);
-            configuration.save(configurationFile);
+        if (this.configuration.get("guid", null) == null) {
+            this.configuration.options().header("http://mcstats.org").copyDefaults(true);
+            this.configuration.save(this.configurationFile);
         }
 
         // Load the guid then
-        guid = configuration.getString("guid");
+        this.guid = this.configuration.getString("guid");
     }
 
 
@@ -138,46 +138,47 @@ public class Metrics {
      * @return True if statistics measuring is running, otherwise false.
      */
     public boolean start() {
-        synchronized (optOutLock) {
+        synchronized (this.optOutLock) {
             // Did we opt out?
-            if (isOptOut()) {
+            if (this.isOptOut()) {
                 return false;
             }
 
             // Is metrics already running?
-            if (taskId >= 0) {
+            if (this.taskId >= 0) {
                 return true;
             }
 
             // Begin hitting the server with glorious data
-            taskId = plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, new Runnable() {
+            this.taskId = this.plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(this.plugin, new Runnable() {
 
                 private boolean firstPost = true;
 
-                public void run() {
+                @Override
+				public void run() {
                     try {
                         // This has to be synchronized or it can collide with the disable method.
-                        synchronized (optOutLock) {
+                        synchronized (Metrics.this.optOutLock) {
                             // Disable Task, if it is running and the server owner decided to opt-out
-                            if (isOptOut() && taskId > 0) {
-                                plugin.getServer().getScheduler().cancelTask(taskId);
-                                taskId = -1;
+                            if (Metrics.this.isOptOut() && (Metrics.this.taskId > 0)) {
+                                Metrics.this.plugin.getServer().getScheduler().cancelTask(Metrics.this.taskId);
+                                Metrics.this.taskId = -1;
                             }
                         }
 
                         // We use the inverse of firstPost because if it is the first time we are posting,
                         // it is not a interval ping, so it evaluates to FALSE
                         // Each time thereafter it will evaluate to TRUE, i.e PING!
-                        postPlugin(!firstPost);
+                        Metrics.this.postPlugin(!this.firstPost);
 
                         // After the first post we set firstPost to false
                         // Each post thereafter will be a ping
-                        firstPost = false;
-                    } catch (IOException e) {
+                        this.firstPost = false;
+                    } catch (final IOException e) {
                         Bukkit.getLogger().log(Level.INFO, "[Metrics] " + e.getMessage());
                     }
                 }
-            }, 0, PING_INTERVAL * 1200);
+            }, 0, Metrics.PING_INTERVAL * 1200);
 
             return true;
         }
@@ -189,18 +190,18 @@ public class Metrics {
      * @return
      */
     public boolean isOptOut() {
-        synchronized(optOutLock) {
+        synchronized(this.optOutLock) {
             try {
                 // Reload the metrics file
-                configuration.load(CONFIG_FILE);
-            } catch (IOException ex) {
+                this.configuration.load(Metrics.CONFIG_FILE);
+            } catch (final IOException ex) {
                 Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
                 return true;
-            } catch (InvalidConfigurationException ex) {
+            } catch (final InvalidConfigurationException ex) {
                 Bukkit.getLogger().log(Level.INFO, "[Metrics] " + ex.getMessage());
                 return true;
             }
-            return configuration.getBoolean("opt-out", false);
+            return this.configuration.getBoolean("opt-out", false);
         }
     }
 
@@ -211,16 +212,16 @@ public class Metrics {
      */
     public void enable() throws IOException {
         // This has to be synchronized or it can collide with the check in the task.
-        synchronized (optOutLock) {
+        synchronized (this.optOutLock) {
             // Check if the server owner has already set opt-out, if not, set it.
-            if (isOptOut()) {
-                configuration.set("opt-out", false);
-                configuration.save(configurationFile);
+            if (this.isOptOut()) {
+                this.configuration.set("opt-out", false);
+                this.configuration.save(this.configurationFile);
             }
 
             // Enable Task, if it is not running
-            if (taskId < 0) {
-                start();
+            if (this.taskId < 0) {
+                this.start();
             }
         }
     }
@@ -232,17 +233,17 @@ public class Metrics {
      */
     public void disable() throws IOException {
         // This has to be synchronized or it can collide with the check in the task.
-        synchronized (optOutLock) {
+        synchronized (this.optOutLock) {
             // Check if the server owner has already set opt-out, if not, set it.
-            if (!isOptOut()) {
-                configuration.set("opt-out", true);
-                configuration.save(configurationFile);
+            if (!this.isOptOut()) {
+                this.configuration.set("opt-out", true);
+                this.configuration.save(this.configurationFile);
             }
 
             // Disable Task, if it is running
-            if (taskId > 0) {
-                this.plugin.getServer().getScheduler().cancelTask(taskId);
-                taskId = -1;
+            if (this.taskId > 0) {
+                this.plugin.getServer().getScheduler().cancelTask(this.taskId);
+                this.taskId = -1;
             }
         }
     }
@@ -252,30 +253,30 @@ public class Metrics {
      */
     private void postPlugin(boolean isPing) throws IOException {
         // The plugin's description file containg all of the plugin data such as name, version, author, etc
-        final PluginDescriptionFile description = plugin.getDescription();
+        final PluginDescriptionFile description = this.plugin.getDescription();
 
         // Construct the post data
         final StringBuilder data = new StringBuilder();
-        data.append(encode("guid")).append('=').append(encode(guid));
-        encodeDataPair(data, "version", description.getVersion());
-        encodeDataPair(data, "server", Bukkit.getVersion());
-        encodeDataPair(data, "players", Integer.toString(Bukkit.getServer().getOnlinePlayers().length));
-        encodeDataPair(data, "revision", String.valueOf(REVISION));
+        data.append(Metrics.encode("guid")).append('=').append(Metrics.encode(this.guid));
+        Metrics.encodeDataPair(data, "version", description.getVersion());
+        Metrics.encodeDataPair(data, "server", Bukkit.getVersion());
+        Metrics.encodeDataPair(data, "players", Integer.toString(Bukkit.getServer().getOnlinePlayers().length));
+        Metrics.encodeDataPair(data, "revision", String.valueOf(Metrics.REVISION));
 
         // If we're pinging, append it
         if (isPing) {
-            encodeDataPair(data, "ping", "true");
+            Metrics.encodeDataPair(data, "ping", "true");
         }
 
         // Create the url
-        URL url = new URL(BASE_URL + String.format(REPORT_URL, encode(plugin.getDescription().getName())));
+        final URL url = new URL(Metrics.BASE_URL + String.format(Metrics.REPORT_URL, Metrics.encode(this.plugin.getDescription().getName())));
 
         // Connect to the website
         URLConnection connection;
 
         // Mineshafter creates a socks proxy, so we can safely bypass it
         // It does not reroute POST requests so we need to go around it
-        if (isMineshafterPresent()) {
+        if (this.isMineshafterPresent()) {
             connection = url.openConnection(Proxy.NO_PROXY);
         } else {
             connection = url.openConnection();
@@ -296,7 +297,7 @@ public class Metrics {
         writer.close();
         reader.close();
 
-        if (response == null || response.startsWith("ERR")) {
+        if ((response == null) || response.startsWith("ERR")) {
             throw new IOException(response); //Throw the exception
         }
         //if (response.startsWith("OK")) - We should get "OK" followed by an optional description if everything goes right
@@ -311,7 +312,7 @@ public class Metrics {
         try {
             Class.forName("mineshafter.MineServer");
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return false;
         }
     }
@@ -331,7 +332,7 @@ public class Metrics {
      * @return
      */
     private static void encodeDataPair(final StringBuilder buffer, final String key, final String value) throws UnsupportedEncodingException {
-        buffer.append('&').append(encode(key)).append('=').append(encode(value));
+        buffer.append('&').append(Metrics.encode(key)).append('=').append(Metrics.encode(value));
     }
 
     /**

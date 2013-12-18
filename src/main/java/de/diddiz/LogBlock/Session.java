@@ -4,8 +4,12 @@ import static de.diddiz.LogBlock.config.Config.toolsByType;
 import static org.bukkit.Bukkit.getServer;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import de.diddiz.LogBlock.config.Config;
 
 public class Session
 {
@@ -16,30 +20,32 @@ public class Session
 	public Map<Tool, ToolData> toolData;
 
 	private Session(Player player) {
-		toolData = new HashMap<Tool, ToolData>();
+		this.toolData = new HashMap<Tool, ToolData>();
 		final LogBlock logblock = LogBlock.getInstance();
-		if (player != null)
-			for (final Tool tool : toolsByType.values())
-				toolData.put(tool, new ToolData(tool, logblock, player));
+		if (player != null) {
+			for (final Tool tool : Config.toolsByType.values()) {
+				this.toolData.put(tool, new ToolData(tool, logblock, player));
+			}
+		}
 	}
 
 	public static boolean hasSession(CommandSender sender) {
-		return sessions.containsKey(sender.getName().toLowerCase());
+		return Session.sessions.containsKey(sender.getName().toLowerCase());
 	}
 
 	public static boolean hasSession(String playerName) {
-		return sessions.containsKey(playerName.toLowerCase());
+		return Session.sessions.containsKey(playerName.toLowerCase());
 	}
 
 	public static Session getSession(CommandSender sender) {
-		return getSession(sender.getName());
+		return Session.getSession(sender.getName());
 	}
 
 	public static Session getSession(String playerName) {
-		Session session = sessions.get(playerName.toLowerCase());
+		Session session = Session.sessions.get(playerName.toLowerCase());
 		if (session == null) {
-			session = new Session(getServer().getPlayer(playerName));
-			sessions.put(playerName.toLowerCase(), session);
+			session = new Session(Bukkit.getServer().getPlayer(playerName));
+			Session.sessions.put(playerName.toLowerCase(), session);
 		}
 		return session;
 	}

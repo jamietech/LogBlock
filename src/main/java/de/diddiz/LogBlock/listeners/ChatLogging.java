@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 
 public class ChatLogging extends LoggingListener
 {
@@ -17,18 +18,20 @@ public class ChatLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		if (isLogging(event.getPlayer().getWorld(), Logging.CHAT))
-			consumer.queueChat(event.getPlayer().getName(), event.getMessage());
+		if (Config.isLogging(event.getPlayer().getWorld(), Logging.CHAT)) {
+			this.consumer.queueChat(event.getPlayer().getName(), event.getMessage());
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerChat(AsyncPlayerChatEvent event) {
-		if (isLogging(event.getPlayer().getWorld(), Logging.CHAT))
-			consumer.queueChat(event.getPlayer().getName(), event.getMessage());
+		if (Config.isLogging(event.getPlayer().getWorld(), Logging.CHAT)) {
+			this.consumer.queueChat(event.getPlayer().getName(), event.getMessage());
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onServerCommand(ServerCommandEvent event) {
-		consumer.queueChat("Console", "/" + event.getCommand());
+		this.consumer.queueChat("Console", "/" + event.getCommand());
 	}
 }

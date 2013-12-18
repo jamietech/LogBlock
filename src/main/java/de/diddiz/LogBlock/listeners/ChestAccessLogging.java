@@ -21,6 +21,8 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import de.diddiz.LogBlock.LogBlock;
+import de.diddiz.LogBlock.config.Config;
+import de.diddiz.util.BukkitUtils;
 
 public class ChestAccessLogging extends LoggingListener
 {
@@ -33,19 +35,21 @@ public class ChestAccessLogging extends LoggingListener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onInventoryClose(InventoryCloseEvent event) {
 
-		if (!isLogging(event.getPlayer().getWorld(), Logging.CHESTACCESS)) return;
-		InventoryHolder holder = event.getInventory().getHolder();
-		if (holder instanceof BlockState || holder instanceof DoubleChest) {
+		if (!Config.isLogging(event.getPlayer().getWorld(), Logging.CHESTACCESS)) {
+			return;
+		}
+		final InventoryHolder holder = event.getInventory().getHolder();
+		if ((holder instanceof BlockState) || (holder instanceof DoubleChest)) {
 			final HumanEntity player = event.getPlayer();
-			final ItemStack[] before = containers.get(player);
+			final ItemStack[] before = this.containers.get(player);
 			if (before != null) {
-				final ItemStack[] after = compressInventory(event.getInventory().getContents());
-				final ItemStack[] diff = compareInventories(before, after);
-				final Location loc = getInventoryHolderLocation(holder);
+				final ItemStack[] after = BukkitUtils.compressInventory(event.getInventory().getContents());
+				final ItemStack[] diff = BukkitUtils.compareInventories(before, after);
+				final Location loc = BukkitUtils.getInventoryHolderLocation(holder);
 				for (final ItemStack item : diff) {
-					consumer.queueChestAccess(player.getName(), loc, loc.getWorld().getBlockTypeIdAt(loc), (short)item.getTypeId(), (short)item.getAmount(), rawData(item));
+					this.consumer.queueChestAccess(player.getName(), loc, loc.getWorld().getBlockTypeIdAt(loc), (short)item.getTypeId(), (short)item.getAmount(), BukkitUtils.rawData(item));
 				}
-				containers.remove(player);
+				this.containers.remove(player);
 			}
 		}
 	}
@@ -53,12 +57,14 @@ public class ChestAccessLogging extends LoggingListener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onInventoryOpen(InventoryOpenEvent event) {
 
-		if (!isLogging(event.getPlayer().getWorld(), Logging.CHESTACCESS)) return;
+		if (!Config.isLogging(event.getPlayer().getWorld(), Logging.CHESTACCESS)) {
+			return;
+		}
 		if (event.getInventory() != null) {
-			InventoryHolder holder = event.getInventory().getHolder();
-			if (holder instanceof BlockState || holder instanceof DoubleChest) {
-				if (getInventoryHolderType(holder) != 58) {
-					containers.put(event.getPlayer(), compressInventory(event.getInventory().getContents()));
+			final InventoryHolder holder = event.getInventory().getHolder();
+			if ((holder instanceof BlockState) || (holder instanceof DoubleChest)) {
+				if (BukkitUtils.getInventoryHolderType(holder) != 58) {
+					this.containers.put(event.getPlayer(), BukkitUtils.compressInventory(event.getInventory().getContents()));
 				}
 			}
 		}

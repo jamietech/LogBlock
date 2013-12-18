@@ -11,6 +11,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockFromToEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 import de.diddiz.LogBlock.config.WorldConfig;
 
 public class FluidFlowLogging extends LoggingListener
@@ -23,46 +24,46 @@ public class FluidFlowLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockFromTo(BlockFromToEvent event) {
-		final WorldConfig wcfg = getWorldConfig(event.getBlock().getWorld());
+		final WorldConfig wcfg = Config.getWorldConfig(event.getBlock().getWorld());
 		if (wcfg != null) {
 			final Block to = event.getToBlock();
 			final int typeFrom = event.getBlock().getTypeId();
 			final int typeTo = to.getTypeId();
-			final boolean canFlow = typeTo == 0 || nonFluidProofBlocks.contains(typeTo);
-			if (typeFrom == 10 || typeFrom == 11) {
+			final boolean canFlow = (typeTo == 0) || FluidFlowLogging.nonFluidProofBlocks.contains(typeTo);
+			if ((typeFrom == 10) || (typeFrom == 11)) {
 				if (canFlow && wcfg.isLogging(Logging.LAVAFLOW)) {
-					if (isSurroundedByWater(to) && event.getBlock().getData() <= 2)
-						consumer.queueBlockReplace("LavaFlow", to.getState(), 4, (byte)0);
-					else if (typeTo == 0) {
-						consumer.queueBlockPlace("LavaFlow", to.getLocation(), 10, (byte)(event.getBlock().getData() + 1));
+					if (FluidFlowLogging.isSurroundedByWater(to) && (event.getBlock().getData() <= 2)) {
+						this.consumer.queueBlockReplace("LavaFlow", to.getState(), 4, (byte)0);
+					} else if (typeTo == 0) {
+						this.consumer.queueBlockPlace("LavaFlow", to.getLocation(), 10, (byte)(event.getBlock().getData() + 1));
 					} else {
-						consumer.queueBlockReplace("LavaFlow", to.getState(), 10, (byte)(event.getBlock().getData() + 1));
+						this.consumer.queueBlockReplace("LavaFlow", to.getState(), 10, (byte)(event.getBlock().getData() + 1));
 					}
-				} else if (typeTo == 8 || typeTo == 9) {
+				} else if ((typeTo == 8) || (typeTo == 9)) {
 					if (event.getFace() == BlockFace.DOWN) {
-						consumer.queueBlockReplace("LavaFlow", to.getState(), 1, (byte)0);
+						this.consumer.queueBlockReplace("LavaFlow", to.getState(), 1, (byte)0);
 					} else {
-						consumer.queueBlockReplace("LavaFlow", to.getState(), 4, (byte)0);
+						this.consumer.queueBlockReplace("LavaFlow", to.getState(), 4, (byte)0);
 					}
 				}
-			} else if ((typeFrom == 8 || typeFrom == 9) && wcfg.isLogging(Logging.WATERFLOW)) {
+			} else if (((typeFrom == 8) || (typeFrom == 9)) && wcfg.isLogging(Logging.WATERFLOW)) {
 				if (typeTo == 0) {
-					consumer.queueBlockPlace("WaterFlow", to.getLocation(), 8, (byte)(event.getBlock().getData() + 1));
-				} else if (nonFluidProofBlocks.contains(typeTo)) {
-					consumer.queueBlockReplace("WaterFlow", to.getState(), 8, (byte)(event.getBlock().getData() + 1));
+					this.consumer.queueBlockPlace("WaterFlow", to.getLocation(), 8, (byte)(event.getBlock().getData() + 1));
+				} else if (FluidFlowLogging.nonFluidProofBlocks.contains(typeTo)) {
+					this.consumer.queueBlockReplace("WaterFlow", to.getState(), 8, (byte)(event.getBlock().getData() + 1));
 				}
-				else if (typeTo == 10 || typeTo == 11) {
+				else if ((typeTo == 10) || (typeTo == 11)) {
 					if (to.getData() == 0) {
-						consumer.queueBlockReplace("WaterFlow", to.getState(), 49, (byte)0);
+						this.consumer.queueBlockReplace("WaterFlow", to.getState(), 49, (byte)0);
 					} else if (event.getFace() == BlockFace.DOWN) {
-						consumer.queueBlockReplace("LavaFlow", to.getState(), 1, (byte)0);
+						this.consumer.queueBlockReplace("LavaFlow", to.getState(), 1, (byte)0);
 					}
 				}
-				if (typeTo == 0 || nonFluidProofBlocks.contains(typeTo)) {
+				if ((typeTo == 0) || FluidFlowLogging.nonFluidProofBlocks.contains(typeTo)) {
 					for (final BlockFace face : new BlockFace[]{BlockFace.DOWN, BlockFace.NORTH, BlockFace.WEST, BlockFace.EAST, BlockFace.SOUTH}) {
 						final Block lower = to.getRelative(face);
-						if (lower.getTypeId() == 10 || lower.getTypeId() == 11) {
-							consumer.queueBlockReplace("WaterFlow", lower.getState(), lower.getData() == 0 ? 49 : 4, (byte)0);
+						if ((lower.getTypeId() == 10) || (lower.getTypeId() == 11)) {
+							this.consumer.queueBlockReplace("WaterFlow", lower.getState(), lower.getData() == 0 ? 49 : 4, (byte)0);
 						}
 					}
 				}
@@ -73,8 +74,9 @@ public class FluidFlowLogging extends LoggingListener
 	private static boolean isSurroundedByWater(Block block) {
 		for (final BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.WEST, BlockFace.EAST, BlockFace.SOUTH}) {
 			final int type = block.getRelative(face).getTypeId();
-			if (type == 8 || type == 9)
+			if ((type == 8) || (type == 9)) {
 				return true;
+			}
 		}
 		return false;
 	}

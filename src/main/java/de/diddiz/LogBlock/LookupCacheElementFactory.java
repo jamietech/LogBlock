@@ -16,15 +16,19 @@ public class LookupCacheElementFactory
 	}
 
 	public LookupCacheElement getLookupCacheElement(ResultSet rs) throws SQLException {
-		if (params.bct == BlockChangeType.CHAT)
-			return new ChatMessage(rs, params);
-		if (params.bct == BlockChangeType.KILLS)
-			if (params.sum == SummarizationMode.NONE)
-				return new Kill(rs, params);
-			else if (params.sum == SummarizationMode.PLAYERS)
-				return new SummedKills(rs, params, spaceFactor);
-		if (params.sum == SummarizationMode.NONE)
-			return new BlockChange(rs, params);
-		return new SummedBlockChanges(rs, params, spaceFactor);
+		if (this.params.bct == BlockChangeType.CHAT) {
+			return new ChatMessage(rs, this.params);
+		}
+		if (this.params.bct == BlockChangeType.KILLS) {
+			if (this.params.sum == SummarizationMode.NONE) {
+				return new Kill(rs, this.params);
+			} else if (this.params.sum == SummarizationMode.PLAYERS) {
+				return new SummedKills(rs, this.params, this.spaceFactor);
+			}
+		}
+		if (this.params.sum == SummarizationMode.NONE) {
+			return new BlockChange(rs, this.params);
+		}
+		return new SummedBlockChanges(rs, this.params, this.spaceFactor);
 	}
 }

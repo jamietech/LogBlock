@@ -32,7 +32,7 @@ public class RegionContainer {
 	}
 
 	public Selection getSelection() {
-		return selection;
+		return this.selection;
 	}
 
 	public void setSelection(Selection selection) {

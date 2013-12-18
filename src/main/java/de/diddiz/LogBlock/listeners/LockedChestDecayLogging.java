@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockFadeEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 
 public class LockedChestDecayLogging extends LoggingListener
 {
@@ -15,10 +16,11 @@ public class LockedChestDecayLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockFade(BlockFadeEvent event) {
-		if (isLogging(event.getBlock().getWorld(), Logging.LOCKEDCHESTDECAY)) {
+		if (Config.isLogging(event.getBlock().getWorld(), Logging.LOCKEDCHESTDECAY)) {
 			final int type = event.getBlock().getTypeId();
-			if (type == 95)
-				consumer.queueBlockReplace("LockedChestDecay", event.getBlock().getState(), event.getNewState());
+			if (type == 95) {
+				this.consumer.queueBlockReplace("LockedChestDecay", event.getBlock().getState(), event.getNewState());
+			}
 		}
 	}
 }

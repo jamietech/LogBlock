@@ -4,8 +4,8 @@ import java.util.List;
 
 public class Block
 {
-	private int block;
-	private int data;
+	private final int block;
+	private final int data;
 
 	/**
 	 * @param block The id of the block
@@ -26,7 +26,7 @@ public class Block
 	}
 
 	public static boolean inList(List<Block> types, int blockID) {
-		for (Block block : types) {
+		for (final Block block : types) {
 			if (block.getBlock() == blockID) {
 				return true;
 			}

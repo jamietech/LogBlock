@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.bukkit.Location;
 import de.diddiz.LogBlock.QueryParams.SummarizationMode;
+import de.diddiz.util.MaterialName;
+import de.diddiz.util.Utils;
 
 public class SummedBlockChanges implements LookupCacheElement
 {
@@ -14,9 +16,9 @@ public class SummedBlockChanges implements LookupCacheElement
 	private final float spaceFactor;
 
 	public SummedBlockChanges(ResultSet rs, QueryParams p, float spaceFactor) throws SQLException {
-		group = p.sum == SummarizationMode.PLAYERS ? rs.getString(1) : materialName(rs.getInt(1));
-		created = rs.getInt(2);
-		destroyed = rs.getInt(3);
+		this.group = p.sum == SummarizationMode.PLAYERS ? rs.getString(1) : MaterialName.materialName(rs.getInt(1));
+		this.created = rs.getInt(2);
+		this.destroyed = rs.getInt(3);
 		this.spaceFactor = spaceFactor;
 	}
 
@@ -27,6 +29,6 @@ public class SummedBlockChanges implements LookupCacheElement
 
 	@Override
 	public String getMessage() {
-		return created + spaces((int)((10 - String.valueOf(created).length()) / spaceFactor)) + destroyed + spaces((int)((10 - String.valueOf(destroyed).length()) / spaceFactor)) + group;
+		return this.created + Utils.spaces((int)((10 - String.valueOf(this.created).length()) / this.spaceFactor)) + this.destroyed + Utils.spaces((int)((10 - String.valueOf(this.destroyed).length()) / this.spaceFactor)) + this.group;
 	}
 }

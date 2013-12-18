@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.SignChangeEvent;
 import de.diddiz.LogBlock.LogBlock;
 import de.diddiz.LogBlock.Logging;
+import de.diddiz.LogBlock.config.Config;
 
 public class SignChangeLogging extends LoggingListener
 {
@@ -15,7 +16,8 @@ public class SignChangeLogging extends LoggingListener
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onSignChange(SignChangeEvent event) {
-		if (isLogging(event.getBlock().getWorld(), Logging.SIGNTEXT))
-			consumer.queueSignPlace(event.getPlayer().getName(), event.getBlock().getLocation(), event.getBlock().getTypeId(), event.getBlock().getData(), event.getLines());
+		if (Config.isLogging(event.getBlock().getWorld(), Logging.SIGNTEXT)) {
+			this.consumer.queueSignPlace(event.getPlayer().getName(), event.getBlock().getLocation(), event.getBlock().getTypeId(), event.getBlock().getData(), event.getLines());
+		}
 	}
 }

@@ -15,8 +15,8 @@ public class Kill implements LookupCacheElement
 	final int weapon;
 
 	public Kill(String killerName, String victimName, int weapon, Location loc) {
-		id = 0;
-		date = System.currentTimeMillis() / 1000;
+		this.id = 0;
+		this.date = System.currentTimeMillis() / 1000;
 		this.loc = loc;
 		this.killerName = killerName;
 		this.victimName = victimName;
@@ -24,35 +24,37 @@ public class Kill implements LookupCacheElement
 	}
 
 	public Kill(ResultSet rs, QueryParams p) throws SQLException {
-		id = p.needId ? rs.getInt("id") : 0;
-		date = p.needDate ? rs.getTimestamp("date").getTime() : 0;
-		loc = p.needCoords ? new Location(p.world, rs.getInt("x"), rs.getInt("y"), rs.getInt("z")) : null;
-		killerName = p.needKiller ? rs.getString("killer") : null;
-		victimName = p.needVictim ? rs.getString("victim") : null;
-		weapon = p.needWeapon ? rs.getInt("weapon") : 0;
+		this.id = p.needId ? rs.getInt("id") : 0;
+		this.date = p.needDate ? rs.getTimestamp("date").getTime() : 0;
+		this.loc = p.needCoords ? new Location(p.world, rs.getInt("x"), rs.getInt("y"), rs.getInt("z")) : null;
+		this.killerName = p.needKiller ? rs.getString("killer") : null;
+		this.victimName = p.needVictim ? rs.getString("victim") : null;
+		this.weapon = p.needWeapon ? rs.getInt("weapon") : 0;
 	}
 
 	@Override
 	public String toString() {
 		final StringBuilder msg = new StringBuilder();
-		if (date > 0)
-			msg.append(Config.formatter.format(date)).append(" ");
-		msg.append(killerName).append(" killed ").append(victimName);
-		if (loc != null)
-			msg.append(" at ").append(loc.getBlockX()).append(":").append(loc.getBlockY()).append(":").append(loc.getBlockZ());
-		String weaponName = prettyItemName(new ItemStack(weapon));
+		if (this.date > 0) {
+			msg.append(Config.formatter.format(this.date)).append(" ");
+		}
+		msg.append(this.killerName).append(" killed ").append(this.victimName);
+		if (this.loc != null) {
+			msg.append(" at ").append(this.loc.getBlockX()).append(":").append(this.loc.getBlockY()).append(":").append(this.loc.getBlockZ());
+		}
+		final String weaponName = this.prettyItemName(new ItemStack(this.weapon));
 		msg.append(" with " + weaponName); // + ("aeiou".contains(weaponName.substring(0, 1)) ? "an " : "a " )
 		return msg.toString();
 	}
 
 	@Override
 	public Location getLocation() {
-		return loc;
+		return this.loc;
 	}
 
 	@Override
 	public String getMessage() {
-		return toString();
+		return this.toString();
 	}
 
 	public String prettyItemName(ItemStack i) {

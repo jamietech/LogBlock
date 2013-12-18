@@ -10,7 +10,7 @@ import de.diddiz.LogBlock.LogBlock;
 
 public class LogBlockEditSessionFactory extends EditSessionFactory {
 
-	private LogBlock plugin;
+	private final LogBlock plugin;
 
 	public LogBlockEditSessionFactory(LogBlock lb) {
 		this.plugin = lb;
@@ -18,12 +18,12 @@ public class LogBlockEditSessionFactory extends EditSessionFactory {
 
 	@Override
 	public EditSession getEditSession(LocalWorld world, int maxBlocks, LocalPlayer player) {
-		return new LogBlockEditSession(world, maxBlocks, player, plugin);
+		return new LogBlockEditSession(world, maxBlocks, player, this.plugin);
 	}
 
 	@Override
 	public EditSession getEditSession(LocalWorld world, int maxBlocks, BlockBag blockBag, LocalPlayer player) {
-		return new LogBlockEditSession(world, maxBlocks, blockBag, player, plugin);
+		return new LogBlockEditSession(world, maxBlocks, blockBag, player, this.plugin);
 	}
 
 	public static void initialize(LogBlock logBlock) {
@@ -31,7 +31,7 @@ public class LogBlockEditSessionFactory extends EditSessionFactory {
 			// Check to see if the world edit version is compatible
 			Class.forName("com.sk89q.worldedit.EditSessionFactory").getDeclaredMethod("getEditSession", LocalWorld.class, int.class, BlockBag.class, LocalPlayer.class);
 			WorldEdit.getInstance().setEditSessionFactory(new LogBlockEditSessionFactory(logBlock));
-		} catch (Throwable ignored) {
+		} catch (final Throwable ignored) {
 
 		}
 	}

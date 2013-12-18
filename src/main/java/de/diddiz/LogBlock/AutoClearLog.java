@@ -7,6 +7,10 @@ import static org.bukkit.Bukkit.getServer;
 import java.util.Arrays;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+
+import de.diddiz.LogBlock.config.Config;
+
 public class AutoClearLog implements Runnable
 {
 	private final LogBlock logblock;
@@ -17,13 +21,14 @@ public class AutoClearLog implements Runnable
 
 	@Override
 	public void run() {
-		final CommandsHandler handler = logblock.getCommandsHandler();
-		for (final String paramStr : autoClearLog)
+		final CommandsHandler handler = this.logblock.getCommandsHandler();
+		for (final String paramStr : Config.autoClearLog) {
 			try {
-				final QueryParams params = new QueryParams(logblock, getConsoleSender(), Arrays.asList(paramStr.split(" ")));
-				handler.new CommandClearLog(getServer().getConsoleSender(), params, false);
+				final QueryParams params = new QueryParams(this.logblock, Bukkit.getConsoleSender(), Arrays.asList(paramStr.split(" ")));
+				handler.new CommandClearLog(Bukkit.getServer().getConsoleSender(), params, false);
 			} catch (final Exception ex) {
-				getLogger().log(Level.SEVERE, "Failed to schedule auto ClearLog: ", ex);
+				Bukkit.getLogger().log(Level.SEVERE, "Failed to schedule auto ClearLog: ", ex);
 			}
+		}
 	}
 }

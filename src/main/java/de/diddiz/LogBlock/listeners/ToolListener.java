@@ -8,6 +8,7 @@ import de.diddiz.LogBlock.Tool;
 import de.diddiz.LogBlock.ToolBehavior;
 import de.diddiz.LogBlock.ToolData;
 import de.diddiz.LogBlock.ToolMode;
+import de.diddiz.LogBlock.config.Config;
 import de.diddiz.worldedit.RegionContainer;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -35,7 +36,7 @@ public class ToolListener implements Listener
 
 	public ToolListener(LogBlock logblock) {
 		this.logblock = logblock;
-		handler = logblock.getCommandsHandler();
+		this.handler = logblock.getCommandsHandler();
 	}
 
 	@EventHandler(ignoreCancelled = true)
@@ -43,13 +44,13 @@ public class ToolListener implements Listener
 		if (event.getMaterial() != null) {
 			final Action action = event.getAction();
 			final int type = event.getMaterial().getId();
-			final Tool tool = toolsByType.get(type);
+			final Tool tool = Config.toolsByType.get(type);
 			final Player player = event.getPlayer();
-			if (tool != null && (action == Action.RIGHT_CLICK_BLOCK || action == Action.LEFT_CLICK_BLOCK) && logblock.hasPermission(player, "logblock.tools." + tool.name)) {
+			if ((tool != null) && ((action == Action.RIGHT_CLICK_BLOCK) || (action == Action.LEFT_CLICK_BLOCK)) && this.logblock.hasPermission(player, "logblock.tools." + tool.name)) {
 				final ToolBehavior behavior = action == Action.RIGHT_CLICK_BLOCK ? tool.rightClickBehavior : tool.leftClickBehavior;
-				final ToolData toolData = getSession(player).toolData.get(tool);
-				if (behavior != ToolBehavior.NONE && toolData.enabled) {
-					if (!isLogged(player.getWorld())) {
+				final ToolData toolData = Session.getSession(player).toolData.get(tool);
+				if ((behavior != ToolBehavior.NONE) && toolData.enabled) {
+					if (!Config.isLogged(player.getWorld())) {
 						player.sendMessage(ChatColor.RED + "This world is not currently logged.");
 						event.setCancelled(true);
 						return;
@@ -58,12 +59,12 @@ public class ToolListener implements Listener
 					final QueryParams params = toolData.params;
 					params.loc = null;
 					params.sel = null;
-					if (behavior == ToolBehavior.BLOCK)
+					if (behavior == ToolBehavior.BLOCK) {
 						params.setLocation(block.getRelative(event.getBlockFace()).getLocation());
-					else if (block.getTypeId() != 54 || tool.params.radius != 0)
+					} else if ((block.getTypeId() != 54) || (tool.params.radius != 0)) {
 						params.setLocation(block.getLocation());
-					else {
-						if (logblock.getServer().getPluginManager().isPluginEnabled("WorldEdit")) {
+					} else {
+						if (this.logblock.getServer().getPluginManager().isPluginEnabled("WorldEdit")) {
 							for (final BlockFace face : new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST}) {
 								if (block.getRelative(face).getTypeId() == 54) {
 									params.setSelection(RegionContainer.fromCorners(event.getPlayer().getWorld(),
@@ -76,16 +77,17 @@ public class ToolListener implements Listener
 						}
 					}
 					try {
-						if (toolData.mode == ToolMode.ROLLBACK)
-							handler.new CommandRollback(player, params, true);
-						else if (toolData.mode == ToolMode.REDO)
-							handler.new CommandRedo(player, params, true);
-						else if (toolData.mode == ToolMode.CLEARLOG)
-							handler.new CommandClearLog(player, params, true);
-						else if (toolData.mode == ToolMode.WRITELOGFILE)
-							handler.new CommandWriteLogFile(player, params, true);
-						else
-							handler.new CommandLookup(player, params, true);
+						if (toolData.mode == ToolMode.ROLLBACK) {
+							this.handler.new CommandRollback(player, params, true);
+						} else if (toolData.mode == ToolMode.REDO) {
+							this.handler.new CommandRedo(player, params, true);
+						} else if (toolData.mode == ToolMode.CLEARLOG) {
+							this.handler.new CommandClearLog(player, params, true);
+						} else if (toolData.mode == ToolMode.WRITELOGFILE) {
+							this.handler.new CommandWriteLogFile(player, params, true);
+						} else {
+							this.handler.new CommandLookup(player, params, true);
+						}
 					} catch (final Exception ex) {
 						player.sendMessage(ChatColor.RED + ex.getMessage());
 					}
@@ -98,12 +100,12 @@ public class ToolListener implements Listener
 	@EventHandler
 	public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
 		final Player player = event.getPlayer();
-		if (hasSession(player)) {
-			final Session session = getSession(player);
+		if (Session.hasSession(player)) {
+			final Session session = Session.getSession(player);
 			for (final Entry<Tool, ToolData> entry : session.toolData.entrySet()) {
 				final Tool tool = entry.getKey();
 				final ToolData toolData = entry.getValue();
-				if (toolData.enabled && !logblock.hasPermission(player, "logblock.tools." + tool.name)) {
+				if (toolData.enabled && !this.logblock.hasPermission(player, "logblock.tools." + tool.name)) {
 					toolData.enabled = false;
 					player.getInventory().removeItem(new ItemStack(tool.item, 1));
 					player.sendMessage(ChatColor.GREEN + "Tool disabled.");
@@ -115,13 +117,13 @@ public class ToolListener implements Listener
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent event) {
 		final Player player = event.getPlayer();
-		if (hasSession(player)) {
-			final Session session = getSession(player);
+		if (Session.hasSession(player)) {
+			final Session session = Session.getSession(player);
 			for (final Entry<Tool, ToolData> entry : session.toolData.entrySet()) {
 				final Tool tool = entry.getKey();
 				final ToolData toolData = entry.getValue();
 				final int item = event.getItemDrop().getItemStack().getTypeId();
-				if (item == tool.item && toolData.enabled && !tool.canDrop) {
+				if ((item == tool.item) && toolData.enabled && !tool.canDrop) {
 					player.sendMessage(ChatColor.RED + "You cannot drop this tool.");
 					event.setCancelled(true);
 				}
