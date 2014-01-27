@@ -1,11 +1,9 @@
 package de.diddiz.LogBlock;
 
-import static de.diddiz.util.MaterialName.materialName;
 import static de.diddiz.util.Utils.spaces;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.bukkit.Location;
-import de.diddiz.LogBlock.QueryParams.SummarizationMode;
 
 public class SummedKills implements LookupCacheElement
 {

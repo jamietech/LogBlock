@@ -359,8 +359,7 @@ public class CommandsHandler implements CommandExecutor
 			this.sender = sender;
 			this.params = params;
 			if (async) {
-				if (scheduler.scheduleAsyncDelayedTask(logblock, this) == -1)
-					throw new Exception("Failed to schedule the command");
+				scheduler.runTaskAsynchronously(logblock, this);
 			} else
 				run();
 		}
